@@ -10,6 +10,7 @@ import 'package:flutter_sound/public/flutter_sound_recorder.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_analyzer/analyzer_controller.dart';
+import 'package:video_analyzer/audio_recorder_screen.dart';
 import 'package:video_analyzer/video_analyzer_model.dart';
 
 import 'main.dart';
@@ -139,6 +140,7 @@ class _AnalyzeImageState extends State<AnalyzeImage> {
   }
 
   // Export the drawing as an image
+  String audioPath = "";
   Future<void> saveAnalysis() async {
     if (_controller == null) return;
 
@@ -183,6 +185,7 @@ class _AnalyzeImageState extends State<AnalyzeImage> {
           imagePath: imagePath,
           timestamp: widget.timeStamp,
           text: textEditingController.text,
+          audioPath: audioPath,
         ),
       );
       Get.back();
@@ -368,56 +371,173 @@ class _AnalyzeImageState extends State<AnalyzeImage> {
                 ? const Center(child: CircularProgressIndicator())
                 : _controller == null
                 ? const Center(child: Text("Error loading image"))
-                : Center(
-                  child: AspectRatio(
-                    aspectRatio: widget.aspectRatio,
-                    child: FlutterPainter(controller: _controller!),
-                  ),
-                ),
-      ),
-
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Divider(),
-          Container(
-            padding: EdgeInsets.all(16),
-            // height: 150,
-            child: Row(
-              spacing: 12,
-              children: [
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(36),
-                    child: TextField(
-                      controller: textEditingController,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        filled: true,
-                        contentPadding: EdgeInsets.all(12),
-                        hintText: 'Type your input',
+                : Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        // physics: NeverScrollableScrollPhysics(),
+                        child: SizedBox(
+                          width: double.infinity,
+                          height:
+                              Get.height -
+                              (MediaQuery.of(context).padding.top +
+                                  MediaQuery.of(context).padding.bottom +
+                                  130 +
+                                  110),
+                          child: AspectRatio(
+                            aspectRatio: widget.aspectRatio,
+                            child: FlutterPainter(controller: _controller!),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
+                    Container(
+                      padding: EdgeInsets.all(24),
+                      child: Row(
+                        spacing: 12,
+                        children: [
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(36),
+                              child: TextField(
+                                // onTap: () {
+                                //   Get.bottomSheet(
+                                //     Container(
+                                //       padding: EdgeInsets.all(24),
+                                //       color:
+                                //           Theme.of(
+                                //             context,
+                                //           ).scaffoldBackgroundColor,
+                                //       child: Column(
+                                //         spacing: 24,
+                                //         mainAxisSize: MainAxisSize.min,
+                                //         children: [
+                                //           TextField(
+                                //             controller: textEditingController,
+                                //             decoration: InputDecoration(
+                                //               border: InputBorder.none,
+                                //               filled: true,
+                                //               contentPadding: EdgeInsets.all(12),
+                                //               hintText: 'Type your input',
+                                //             ),
+                                //           ),
 
-                IconButton(
-                  onPressed: () {
-                    if (isRecording == true) {
-                      isRecording = false;
+                                //           ElevatedButton(
+                                //             onPressed: () {
+                                //               Get.back();
+                                //             },
+                                //             child: Text("Save"),
+                                //           ),
+                                //         ],
+                                //       ),
+                                //     ),
+                                //   );
+                                // },
+                                // readOnly: true,
+                                controller: textEditingController,
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  filled: true,
+                                  contentPadding: EdgeInsets.all(12),
+                                  hintText: 'Type your input',
+                                ),
+                              ),
+                            ),
+                          ),
 
-                      return;
-                    }
-                    isRecording = true;
-                  },
-                  icon: Icon(Icons.mic),
+                          IconButton(
+                            onPressed: () {
+                              Get.bottomSheet(
+                                AudioRecorderScreen(
+                                  onRecordingEnded: (String path) {
+                                    audioPath = path;
+                                    Get.back();
+                                  },
+                                ),
+                              );
+                            },
+                            icon: Icon(Icons.mic),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          SizedBox(height: 16),
-        ],
       ),
+
+      // bottomNavigationBar: Column(
+      //   mainAxisSize: MainAxisSize.min,
+      //   children: [
+      //     Divider(),
+      //     Container(
+      //       padding: EdgeInsets.all(16),
+      //       // height: 150,
+      //       child: Row(
+      //         spacing: 12,
+      //         children: [
+      //           Expanded(
+      //             child: ClipRRect(
+      //               borderRadius: BorderRadius.circular(36),
+      //               child: TextField(
+      //                 onTap: () {
+      //                   Get.bottomSheet(
+      //                     Container(
+      //                       padding: EdgeInsets.all(24),
+      //                       color: Theme.of(context).scaffoldBackgroundColor,
+      //                       child: Column(
+      //                         spacing: 24,
+      //                         mainAxisSize: MainAxisSize.min,
+      //                         children: [
+      //                           TextField(
+      //                             controller: textEditingController,
+      //                             decoration: InputDecoration(
+      //                               border: InputBorder.none,
+      //                               filled: true,
+      //                               contentPadding: EdgeInsets.all(12),
+      //                               hintText: 'Type your input',
+      //                             ),
+      //                           ),
+
+      //                           ElevatedButton(
+      //                             onPressed: () {
+      //                               Get.back();
+      //                             },
+      //                             child: Text("Save"),
+      //                           ),
+      //                         ],
+      //                       ),
+      //                     ),
+      //                   );
+      //                 },
+      //                 readOnly: true,
+      //                 controller: textEditingController,
+      //                 decoration: InputDecoration(
+      //                   border: InputBorder.none,
+      //                   filled: true,
+      //                   contentPadding: EdgeInsets.all(12),
+      //                   hintText: 'Type your input',
+      //                 ),
+      //               ),
+      //             ),
+      //           ),
+
+      //           IconButton(
+      //             onPressed: () {
+      //               if (isRecording == true) {
+      //                 isRecording = false;
+
+      //                 return;
+      //               }
+      //               isRecording = true;
+      //             },
+      //             icon: Icon(Icons.mic),
+      //           ),
+      //         ],
+      //       ),
+      //     ),
+      //     SizedBox(height: 16),
+      //   ],
+      // ),
     );
   }
 
